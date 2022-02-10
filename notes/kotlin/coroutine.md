@@ -110,11 +110,20 @@ private open class StandaloneCoroutine(
 `StandaloneCoroutine`仅对 Job 异常做了处理，继承链：
 StandaloneCoroutine > AbstractCoroutine > JobSupport > Job
 
+![image info](../img/coroutine_job.png)
+
 
 `JobSupport`是`Job`的具体实现类，实际上是一个状态机的模式
 
 
-内部状态的流转如下：
-//todo 待补充
+内部状态如下：
+* 新建 （NEW）：`state == EMPTY_NEW`，初始化，等待开启;
+* 激活 （ACTIVE）: `state == EMPTY_ACTIVE`，激活的协程正在执行;
+* 正在取消 （CANCELLING）: `state is Finishing`， 正在取消协程;
+* 正在完成 （COMPLETING）: `state.isCompleting == true`，不再接收子 Job，等待最后的子 Job 完成;
+* 密封 （SEALED）: `state.isSealed == true`， 此时将无法再进行异常处理
+* 完成 （COMPLETE）: `state !is Incomplete`, 回调 `onComplete`;
+
+
 
 再回过头来看下反编译的Java代码，
